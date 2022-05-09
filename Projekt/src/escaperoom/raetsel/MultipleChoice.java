@@ -1,123 +1,91 @@
 package escaperoom.raetsel;
 
-import java.util.ArrayList;
-
+import escaperoom.exceptions.InvalidInputException;
 import escaperoom.inout.InOut;
+import escaperoom.riddle.Riddle;
 
-public class MultipleChoice {
+/**
+ * 
+ * @author Philip Keidel
+ * @version 1.0
+ */
+public class MultipleChoice implements Riddle {
 
 	// Vars
 	private InOut io = InOut.getInOut();
-	private ArrayList<String> questions = new ArrayList<>();
-	private String[][] possibleAnswers = new String[3][3];
+	private String question;
+	private String[] possibleAnswers;
+	//CorrectAnswer String Array
+	//FalseAnswer 2dim String Array
+	//Question String Array
+	private int expectedAnswer;
+	private String introduction;
+	private boolean solved = false;
+	private String output = "";
 
-	private int[] correctAnswerPositions = new int[3];
-
-	// Konstr
-	public MultipleChoice() {
-
+	// Constructors
+	public MultipleChoice(String question, String[] possibleAnswers, int expectedAnswer) {
+		this.question = question;
+		this.possibleAnswers = possibleAnswers;
+		this.expectedAnswer = expectedAnswer;
 	}
 
 	// Methods
-	public void startRiddle() {
-		// Open scanner
-		io.startScanner();
-		
-		//Init Questions, Options, Answers
-		this.questions();
-		this.addOptions();
-		this.initializeAnswerPositions();
-
-		for (int i = 0; i < questions.size(); i++) {
-			boolean isFalse = true;
-			//Loop until answer is correct
-			while (isFalse) {
-				io.print(this.printQuestion(i));
-
-				io.print("");
-
-				io.print(this.printOptions(i));
-
-				io.print("Antwort eingeben: ");
-				int antwort = Integer.valueOf(io.getText());
-
-				if (antwort == correctAnswerPositions[i]) {
-					io.print("Antwort korrekt!");
-					isFalse = false;
-				} else {
-					io.print("Antwort leider falsch");
-				}
-			}
-			io.print("");
-
-		}
-		// Close scanner
-		io.closeScanner();
-	}
-
-	private void questions() {
-		this.addQuestion("Was ist 5 + 7?");
-		this.addQuestion("Wann endete der 2. Weltkrieg");
-		this.addQuestion("Wann ist das nächste Schaltjahr");
-	}
-
-	private void addOptionsQuestionOne() {
-		this.addOption("12", 0, 0);
-		this.addOption("17", 0, 1);
-		this.addOption("-4", 0, 2);
-	}
-
-	private void addOptionsQuestionTwo() {
-		this.addOption("1939", 1, 0);
-		this.addOption("1945", 1, 1);
-		this.addOption("1967", 1, 2);
-	}
-
-	private void addOptionsQuestionThree() {
-		this.addOption("2022", 2, 0);
-		this.addOption("2024", 2, 1);
-		this.addOption("2023", 2, 2);
-	}
-
-	private void addOptions() {
-		this.addOptionsQuestionOne();
-		this.addOptionsQuestionTwo();
-		this.addOptionsQuestionThree();
-	}
-
-	private String printOptions(int index) {
+	@Override
+	public String toString() {
 		String output = "";
-		if (index < possibleAnswers.length) {
-			int x = 1;
-			for (int n = 0; n < possibleAnswers[index].length; n++) {
-				output += "   " + x++ + " " + possibleAnswers[index][n];
-				output += "\n";
-			}
+		int i = 1;
+		output += question + "\n";
+		for (String s : possibleAnswers) {
+			output += "   " + i + " " + s + "\n";
+			i++;
 		}
-
 		return output;
 	}
 
-	private void addQuestion(String question) {
-		this.questions.add(question);
+	@Override
+	public String inspect() {
+		this.introduction = "Angekommen in der Bücherrei findest du ein Buch mit Programmierfragen. "
+				+ "Diese Fragen decken den aktuellen Stoff der Prog2-Vorlesungen und eignen sich somit optimal"
+				+ "zur Klausurvorbereitung. \nDu versuchst daher folgende Multiple Choice-Fragen zu lösen";
+		this.introduction += "\n";
+		return introduction;
 	}
 
-	private String printQuestion(int pos) {
-		return this.questions.get(pos);
-	}
+	@Override
+	public void solve() {
+		boolean loop = true;
+		int i = 1;
+		this.output += question + "\n";
+		for (String s : possibleAnswers) {
+			this.output += "   " + i + " " + s + "\n";
+			i++;
+		}
+		System.out.println(this.output);
 
-	private void addOption(String answer, int posQuestion, int posAnswer) {
-		this.possibleAnswers[posQuestion][posAnswer] = answer;
-	}
-
-	private void addCorrectAnswersPosition(int index, int answer) {
-		this.correctAnswerPositions[index] = answer;
+		while (loop) {
+			this.io.printSameLine("Antwort: ");
+			int actualAnswer;
+			try {
+				actualAnswer = io.getInteger();
+				if (actualAnswer == expectedAnswer) {
+					this.io.print("Antwort korrekt!");
+					this.solved = true;
+					loop = false;
+				} else {
+					this.io.print("Antwort leider falsch");
+				}
+			} catch (InvalidInputException e) {
+				io.print("Fehlerhafte Eingabe. Bitte Zahl der Antwort eingeben");
+			}
+			
+		}
+		
 	}
 	
-	private void initializeAnswerPositions() {
-		this.addCorrectAnswersPosition(0, 1);
-		this.addCorrectAnswersPosition(1, 2);
-		this.addCorrectAnswersPosition(2, 2);
+	@Override
+	public boolean isSolved() {
+		return this.solved;
 	}
-	
+
 }

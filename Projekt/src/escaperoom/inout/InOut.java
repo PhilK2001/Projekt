@@ -29,6 +29,10 @@ public class InOut {
 	public void print(String toPrint) {
 		System.out.println(toPrint);
 	}
+	
+	public void printSameLine(String toPrint) {
+		System.out.print(toPrint);
+	}
 
 	public String getText() {
 		return sc.next();
